@@ -1,12 +1,12 @@
 #!/usr/bin/python
 
 """
-    Updated 03-07-2014
-    SET
+    Set
     Philippe Ilharreguy
+    Updated 03-09-2015
  
  
-    Quick Linux Python script for FreeDNS IP update (freedns.afraid.org).
+    Quick Linux DNS IP Updater Python script for FreeDNS (freedns.afraid.org)
     The script get the first external IP retrieved from one of 5 ip servers. Then if
     new external ip is different from preview's one it update freeDNS server IP. Finally
     it write to a log file the update procedure.
@@ -46,7 +46,9 @@ def ip_str_clean(ip_str):
 
 
 # Store the first IP response retrieved from URLs
-external_ip = ""
+public_ip = ""
+# Store preview public IP
+preview_public_IP = ""
 
 for ip_url in ip_urls:
     try:
@@ -54,8 +56,8 @@ for ip_url in ip_urls:
         req_ip = requests.get(ip_url)
 
         if req_ip.ok == True:
-            external_ip = ip_str_clean(req_ip.text)
-            print 'Your IP is:', external_ip
+            public_ip = ip_str_clean(req_ip.text)
+            print 'Your IP is:', public_ip
             break   # Stop for loop when the first external ip is retrieved
 
         else:
@@ -65,49 +67,55 @@ for ip_url in ip_urls:
         print e
 
 
-# The file where the last known external IP is written
+# The file where the last known public IP is written
 ip_file = ".freedns_ip"
 # Save IP updates
 log_ip_update_file = "log_ip_update"
 
-# Create the file if it doesnt exist, otherwise update old IP
+# Create the file if it doesnt exist, otherwise read preview public IP
 if not os.path.exists(ip_file):
-    with open(ip_file, "w") as fh:
-        fh.write(external_ip)
-    preview_external_ip = "Unknown"
+    fh = open(ip_file, "w")
+    fh.write(public_ip)
+    fh.close()
+    preview_public_ip = "Unknown"
     print "Created FreeDNS IP log file: " + ip_file
-
 else:
-    with open(ip_file, "r") as fh:
-        preview_external_ip = fh.read()
-	preview_external_ip = preview_external_ip.rstrip('\n')
+    fh = open(ip_file, "r")
+    preview_public_ip = fh.read()
+    fh.close()
+    preview_public_ip = ip_str_clean(preview_public_ip)
 
 # Update IP only if current IP is different from preview's one
-if preview_external_ip != external_ip:
+if preview_public_ip != public_ip:
     # Update IP in freeDNS server
     requests.get(update_freedns_url)
-    
-    # Save new external ip
-    with open(ip_file, "w") as fh:
-        fh.write(external_ip)
-    
+
+    # Save new public ip
+    fh = open(ip_file, "w")
+    fh.write(public_ip)
+    fh.close()
+
     # Create log file
     date_ip_update_str = time.strftime('%d/%m/%Y %H:%M:%S')
-    log_str = date_ip_update_str + "   New external IP is " + external_ip + ". Preview external IP was " + preview_external_ip + ".\n"
+    log_str = date_ip_update_str + "   New public IP is " + public_ip + ". Preview public IP was " + preview_public_ip + ".\n"
     print log_str
-    
-    # Read file to count how many lines there are
-    with open(log_ip_update_file, "a+") as fh:
-        file_lines = fh.readlines()
-        file_lines_count = len(file_lines)
-    
+
+    # Read file to count how many lines it has
+    fh = open(log_ip_update_file, "a+")
+    file_lines = fh.readlines()
+    file_lines_count = len(file_lines)
+    fh.close()
+
     if file_lines_count >= 5:
-        with open(log_ip_update_file, "w") as fh:
-            file_lines = file_lines[1:5]
-            file_lines.append(log_str)
-            fh.writelines(file_lines)
+        fh = open(log_ip_update_file, "w")
+        file_lines = file_lines[1:5]
+        file_lines.append(log_str)
+        fh.writelines(file_lines)
+        fh.close()
+
     else:
-        with open(log_ip_update_file, "a") as fh:
-            fh.write(log_str)
+        fh = open(log_ip_update_file, "a")
+        fh.write(log_str)
+        fh.close()
 else:
-    print "The external IP hasn't changed. DNS IP update not necessary."
+    print "The public IP hasn't changed. DNS IP update not necessary."
