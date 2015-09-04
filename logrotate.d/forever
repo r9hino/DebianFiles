@@ -1,0 +1,9 @@
+/var/lib/cloud9/WSN/.forever/*.log {
+daily
+rotate 3
+missingok
+notifempty
+sharedscripts
+copytruncate
+dateext
+}
