@@ -1,8 +1,8 @@
 # Debian crontab for WSN server on Beaglebone Black
 
 # Check for IP changes.
-*/3 * * * * cd /root/scripts; python /root/scripts/freeDNS_BBB.py
-@reboot     cd /root/scripts; python /root/scripts/freeDNS_BBB.py
+*/3 * * * * cd /root/DNSUpdateScript; python /root/DNSUpdateScript/DNSUpdate.py
+@reboot     cd /root/DNSUpdateScript; python /root/DNSUpdateScript/DNSUpdate.py
 
 # Enable UART2 on start up.
 @reboot sudo echo BB-UART2 > /sys/devices/bone_capemgr.*/slots
