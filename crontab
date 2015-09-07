@@ -11,4 +11,4 @@
 @reboot cd /sys/class/leds/beaglebone:green:usr0; echo none > trigger
 
 # Start serverWSN.js on boot.
-@reboot sudo forever start /var/lib/cloud9/WSN/serverWSN.js &> /dev/null
+@reboot sudo forever start /var/lib/cloud9/WSN_BBB/serverWSN.js &> /dev/null
