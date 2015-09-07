@@ -1,4 +1,4 @@
-/var/lib/cloud9/WSN/.forever/*.log {
+/var/lib/cloud9/WSN_BBB/.forever/*.log {
 daily
 rotate 3
 missingok
