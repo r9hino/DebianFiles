@@ -17,13 +17,13 @@
 
     Must set update_key and make sure that ip_file is read and writable
  """
-
+import sys
 import os
 import requests
 import time
 
 # FreeDNS Update Key
-update_key = "YmM3akpzVG9zbTJvTUQ3VTNpbE9mazZVOjEyMDExMTgw"
+update_key = "YmM3akpzVG9zbTJvTUQ3VTNpbE9mazZVOjE0OTUwNDIz"
 # FreeDNS Update URL
 update_freedns_url = "http://freedns.afraid.org/dynamic/update.php?" + update_key
 
@@ -31,10 +31,8 @@ update_freedns_url = "http://freedns.afraid.org/dynamic/update.php?" + update_ke
 # Use these IP server URLs, because they return all the same IP format (plain text),
 # so IP can be retreived with the same method
 ip_urls = ['http://api.ipify.org',
-           'http://curlmyip.com',
            'http://ip.dnsexit.com',
-           'http://www.icanhazip.com',
-           'http://www.danielgibbs.net/ip.php']
+           'http://www.icanhazip.com']
 
 # Retrieved IP strings are cleaned by this function
 def ip_str_clean(ip_str):
@@ -53,8 +51,7 @@ preview_public_IP = ""
 for ip_url in ip_urls:
     try:
         print ip_url
-        req_ip = requests.get(ip_url)
-
+        req_ip = requests.get(ip_url, timeout=5)
         if req_ip.ok == True:
             public_ip = ip_str_clean(req_ip.text)
             print 'Your IP is:', public_ip
@@ -62,9 +59,15 @@ for ip_url in ip_urls:
 
         else:
             print 'Website not working well. No IP retrieved.'
+    except (requests.exceptions.Timeout, requests.exceptions.ConnectionError) as err:
+        print 'Server taking too long. Probably is down.'
+    except:
+        print "Unexpected error:", sys.exc_info()[0]
 
-    except requests.exceptions.RequestException as e:    # This is the correct syntax
-        print e
+# Exit progrm if public_ip doesn't match the ip format.
+# An error must ocurred retrieving the ip from the servers.
+if len(public_ip)<7:    # ip string length >= 7 is good. EX: 1.1.1.1
+    sys.exit("Servers didn't return any ip. Execution stoped.")
 
 
 # The file where the last known public IP is written
