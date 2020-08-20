@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 """
     Set
@@ -10,11 +10,9 @@
     The script get the first external IP retrieved from one of 5 ip servers. Then if
     new external ip is different from preview's one it update freeDNS server IP. Finally
     it write to a log file the update procedure.
-
     http://www.danielgibbs.net/
     https://gist.github.com/jfrobbins/6085917
     http://stackoverflow.com/questions/845058/how-to-get-line-count-cheaply-in-python
-
     Must set update_key and make sure that ip_file is read and writable
  """
 import sys
@@ -23,7 +21,7 @@ import requests
 import time
 
 # FreeDNS Update Key
-update_key = "YmM3akpzVG9zbTJvTUQ3VTNpbE9mazZVOjE0OTUwNDIz"
+update_key = "YWxncGM0a1U1Qks3QWF3VUIxOUQ6MTkwMzYyNTg="
 # FreeDNS Update URL
 update_freedns_url = "http://freedns.afraid.org/dynamic/update.php?" + update_key
 
@@ -50,19 +48,19 @@ preview_public_IP = ""
 
 for ip_url in ip_urls:
     try:
-        print ip_url
+        print(ip_url)
         req_ip = requests.get(ip_url, timeout=5)
         if req_ip.ok == True:
             public_ip = ip_str_clean(req_ip.text)
-            print 'Your IP is:', public_ip
+            print('Your IP is: ', public_ip)
             break   # Stop for loop when the first external ip is retrieved
 
         else:
-            print 'Website not working well. No IP retrieved.'
+            print('Website not working well. No IP retrieved.')
     except (requests.exceptions.Timeout, requests.exceptions.ConnectionError) as err:
-        print 'Server taking too long. Probably is down.'
+        print('Server taking too long. Probably is down.')
     except:
-        print "Unexpected error:", sys.exc_info()[0]
+        print("Unexpected error:", sys.exc_info()[0])
 
 # Exit progrm if public_ip doesn't match the ip format.
 # An error must ocurred retrieving the ip from the servers.
@@ -81,7 +79,7 @@ if not os.path.exists(ip_file):
     fh.write(public_ip)
     fh.close()
     preview_public_ip = "Unknown"
-    print "Created FreeDNS IP log file: " + ip_file
+    print("Created FreeDNS IP log file: " + ip_file)
 else:
     fh = open(ip_file, "r")
     preview_public_ip = fh.read()
@@ -101,7 +99,7 @@ if preview_public_ip != public_ip:
     # Create log file
     date_ip_update_str = time.strftime('%d/%m/%Y %H:%M:%S')
     log_str = date_ip_update_str + "   New public IP is " + public_ip + ". Preview public IP was " + preview_public_ip + ".\n"
-    print log_str
+    print(log_str)
 
     # Read file to count how many lines it has
     fh = open(log_ip_update_file, "a+")
@@ -121,4 +119,4 @@ if preview_public_ip != public_ip:
         fh.write(log_str)
         fh.close()
 else:
-    print "The public IP hasn't changed. DNS IP update not necessary."
+    print("The public IP hasn't changed. DNS IP update not necessary.")
